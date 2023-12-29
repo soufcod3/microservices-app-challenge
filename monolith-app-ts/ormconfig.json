@@ -1,0 +1,13 @@
+{
+  "type": "mysql",
+  "host": "dbms",
+  "port": 3306,
+  "username": "root",
+  "password": "rootpassword",
+  "database": "microservices_ecommerce_db",
+  "synchronize": true,
+  "logging": false,
+  "entities": [
+    "src/services/ORM/Entity/**/*.ts"
+  ]
+}

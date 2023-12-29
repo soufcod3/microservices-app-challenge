@@ -38,6 +38,10 @@ const handleEvent = (type, data) => {
     }
 }
 
+app.get('/', (req, res) => {
+    res.send('Hello');
+});
+
 app.get('/posts', (req, res) => {
     res.send(posts);
 })

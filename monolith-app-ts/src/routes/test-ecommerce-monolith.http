@@ -1,0 +1,24 @@
+GET http://localhost:3000/api/product
+Accept: application/json
+
+### POST /api/posts
+POST http://localhost:3000/api/posts
+Accept: application/json
+Content-Type: application/json
+
+{
+  "title": "foo"
+}
+
+### GET /testApi
+GET http://localhost:3008
+Accept: application/json
+
+### POST comment
+POST http://localhost:3008/posts
+Accept: application/json
+Content-Type: application/json
+
+{
+  "title": "Toto"
+}

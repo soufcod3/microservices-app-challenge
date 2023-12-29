@@ -18,6 +18,10 @@ app.get('/posts/:id/comments', (req, res) => {
     res.send(commentsByPostId[postId] || []) // filter comments
 })
 
+app.get('/', (req, res) => {
+    res.send('Hello');
+});
+
 app.post('/posts/:id/comments', async (req, res) => {
     const postId = req.params.id
 
