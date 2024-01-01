@@ -8,19 +8,26 @@ app.use(bodyParser.json());
 const events = []
 
 app.post("/events", (req, res) => {
-  const event = req.body;
+  const event = req.body
+
+  console.log('events', events);
 
   events.push(event)
 
-  axios.post('http://localhost:4000/events', event).catch(err => console.error('error in posts events endpoint : ', err)); // posts
-  axios.post('http://localhost:4001/events', event).catch(err => console.error('error in comments events endpoint : ', err)); // comments
-  axios.post('http://localhost:4002/events', event).catch(err => console.error('error in query events endpoint : ', err)); // query
-  axios.post('http://localhost:4003/events', event).catch(err => console.error('error in moderation events endpoint : ', err)); // moderation 
+  try {
+    axios.post('http://posts:4000/events', event).catch(err => console.error('error in posts events endpoint : ', err)); // posts
+    axios.post('http://comments:4001/events', event).catch(err => console.error('error in comments events endpoint : ', err)); // comments
+    axios.post('http://query:4002/events', event).catch(err => console.error('error in query events endpoint : ', err)); // query
+    axios.post('http://moderation:4003/events', event).catch(err => console.error('error in moderation events endpoint : ', err)); // moderation
+  } catch (error) {
+    console.error('error in event bus events endpoint : ', error);
+  }
 
   res.send({ status: 'OK' })
 });
 
 app.get("/events", (req, res) => {
+  console.log('events', events)
   res.send(events);
 });
 

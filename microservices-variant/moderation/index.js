@@ -9,15 +9,19 @@ const handleEvent = async (type, data) => {
   if (type === 'CommentCreated') {
     const status = data.content.includes('orange') ? 'rejected' : 'approved'
 
-      await axios.post('http://localhost:4005/events', {
-          type: 'CommentModerated',
-          data: {
-              id: data.id,
-              postId: data.postId,
-              status,
-              content: data.content
-          }
+    try {
+      await axios.post('http://event-bus:4005/events', {
+        type: 'CommentModerated',
+        data: {
+          id: data.id,
+          post_id: data.post_id,
+          status,
+          content: data.content
+        }
       })
+    } catch (error) {
+      console.error('error in moderation events endpoint : ', error);
+    }
   } 
 } 
 
@@ -26,17 +30,22 @@ app.post("/events", async (req, res) => {
     const { type, data } = req.body
 
     if (type === 'CommentCreated') {
-        const status = data.content.includes('orange') ? 'rejected' : 'approved'
+      const status = data.content.includes('orange') ? 'rejected' : 'approved'
 
-        await axios.post('http://localhost:4005/events', {
-            type: 'CommentModerated',
-            data: {
-                id: data.id,
-                postId: data.postId,
-                status,
-                content: data.content
-            }
+      try {
+        await axios.post('http://event-bus:4005/events', {
+          type: 'CommentModerated',
+          data: {
+            id: data.id,
+            post_id: data.post_id,
+            status,
+            content: data.content
+          }
         })
+      } catch (error) {
+        console.error('error in moderation events endpoint : ', error);
+      }
+
     }
     res.send({})
 });
@@ -44,11 +53,15 @@ app.post("/events", async (req, res) => {
 app.listen(4003, async() => {
   console.log("listening on 4003");
 
-  const res = await axios.get('http://localhost:4005/events')
+  try {
+    const res = await axios.get('http://event-bus:4005/events');
 
-  for (const event of res.data) {
+    for (const event of res.data) {
       console.log('processing event : ', event.type)
 
       handleEvent(event.type, event.data)
+    }
+  } catch (error) {
+    console.error('error in moderation events endpoint : ', error);
   }
 }); 

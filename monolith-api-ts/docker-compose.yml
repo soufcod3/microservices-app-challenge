@@ -14,6 +14,19 @@ services:
     volumes:
       - ./:/home/api:cached
 
+  app:
+    build:
+      context: .
+      dockerfile: ../client/docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    working_dir: /home/app
+    networks:
+      - api-network
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../client:/home/app:cached
+
   dbms:
     image: mariadb
     restart: always

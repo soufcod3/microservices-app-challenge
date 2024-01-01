@@ -1,0 +1,22 @@
+### CREATE POST
+POST localhost:4000/posts
+Accept: application/json
+Content-Type: application/json
+
+{
+    "title": "Title 3"
+}
+
+
+### POST /posts
+POST localhost:4001/posts/c332abfe/comments
+Accept: application/json
+Content-Type: application/json
+
+{
+    "content": "lorem ipsum dolor sit amet 3 orange to the moon"
+}
+
+### GET /posts
+GET localhost:4002/posts
+Accept: application/json
