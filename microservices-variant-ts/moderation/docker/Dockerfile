@@ -12,6 +12,6 @@ ENV TZ Europe/Paris
 
 ENV SHELL /bin/bash
 
-WORKDIR /home/api
+WORKDIR /home/moderation
 
 RUN /bin/bash

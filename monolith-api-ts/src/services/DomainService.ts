@@ -1,5 +1,5 @@
 import {OrmRepository} from "./ORM/OrmRepository";
-import {Post as OrmPost} from "./ORM/Entity/OrmPost";
+import {OrmPost} from "./ORM/Entity/OrmPost";
 import {injectable, singleton} from "tsyringe";
 import {v4 as uuid} from "uuid";
 import {Comment} from "./ORM/Entity/OrmComment";

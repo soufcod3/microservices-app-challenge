@@ -1,0 +1,119 @@
+version: '3.9'
+
+services:
+  comments-service:
+    build:
+      context: .
+      dockerfile: ./comments/docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    working_dir: /home/comments
+    networks:
+      - api-network
+    ports:
+      - "3008:3008"
+    volumes:
+      - ./comments:/home/comments-service:cached
+
+  event-bus-service:
+    build:
+      context: .
+      dockerfile: ./event-bus/docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    working_dir: /home/event-bus
+    networks:
+      - api-network
+    ports:
+      - "3009:3009"
+    volumes:
+      - ./event-bus:/home/event-bus-service:cached
+
+  moderation-service:
+    build:
+      context: .
+      dockerfile: ./moderation/docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    working_dir: /home/moderation
+    networks:
+      - api-network
+    ports:
+      - "3010:3010"
+    volumes:
+      - ./moderation:/home/moderation-service:cached
+
+  posts-service:
+    build:
+      context: .
+      dockerfile: ./posts/docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    working_dir: /home/posts
+    networks:
+      - api-network
+    ports:
+      - "3011:3011"
+    volumes:
+      - ./posts:/home/posts-service:cached
+
+  query-service:
+    build:
+      context: .
+      dockerfile: ./query/docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do :; done"
+    working_dir: /home/query
+    networks:
+      - api-network
+    ports:
+      - "3012:3012"
+    volumes:
+      - ./query:/home/query-service:cached
+
+  dbms-comments:
+    image: mariadb
+    restart: always
+    ports:
+      - "3309:3306"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=false
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    command: [
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+    ]
+    volumes:
+      - ./comments/dbms/mariadb.cnf:/etc/mysql/mariadb.cnf
+      - ./comments/dbms/dbms-data:/var/lib/mysql
+    networks:
+      - api-network
+
+  dbms-posts:
+    image: mariadb
+    restart: always
+    ports:
+      - "3310:3306"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=false
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    command: [
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+    ]
+    volumes:
+      - ./posts/dbms/mariadb.cnf:/etc/mysql/mariadb.cnf
+      - ./posts/dbms/dbms-data:/var/lib/mysql
+    networks:
+      - api-network
+
+  proxy:
+    image: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - ./nginx/api-dev.nginx.conf:/etc/nginx/conf.d/api.nginx.conf
+    networks:
+      - api-network
+
+networks:
+    api-network:
+        driver: bridge
+        name: api-network

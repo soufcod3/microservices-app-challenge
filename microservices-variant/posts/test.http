@@ -4,17 +4,17 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "title": "Title 3"
+    "title": "Title 1"
 }
 
 
 ### POST /posts
-POST localhost:4001/posts/c332abfe/comments
+POST localhost:4001/posts/e15a4c94/comments
 Accept: application/json
 Content-Type: application/json
 
 {
-    "content": "lorem ipsum dolor sit amet 3 orange to the moon"
+    "content": "Mugiwara no Luffy"
 }
 
 ### GET /posts

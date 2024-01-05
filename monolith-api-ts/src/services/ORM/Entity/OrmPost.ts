@@ -1,7 +1,7 @@
 import {Column, Entity, PrimaryColumn} from "typeorm";
 
 @Entity()
-export class Post {
+class Post {
     @PrimaryColumn()
     readonly uuid: string;
 
@@ -13,3 +13,5 @@ export class Post {
         this.title = title;
     }
 }
+
+export {Post as OrmPost};

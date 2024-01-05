@@ -1,34 +1,101 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
+const {randomBytes} = require("crypto");
+const {EventQueueManager} = require("./event-queue-manager");
+
+// const POSTS_PORT = 4000;
+const COMMENTS_PORT = 4001;
+const QUERY_PORT = 4002;
+const MODERATION_PORT = 4003;
+// const EVENT_BUS_PORT = 4005;
+
+// const POSTS_HOST = 'posts';
+const COMMENTS_HOST = 'comments';
+const QUERY_HOST = 'query';
+const MODERATION_HOST = 'moderation';
+// const EVENT_BUS_HOST = 'event-bus';
 
 const app = express();
 app.use(bodyParser.json());
 
-const events = []
+const events = [];
+const eventQueueManager = new EventQueueManager();
+
+/**
+ *
+ * @param event_payload {{id, event_name, event_data, event_status, retry_count}}
+ * @param host
+   * @param port
+ */
+function sendEvent(event_payload, host, port) {
+  try {
+    console.debug(`sending event type:${event_payload.event_name} with id:${event_payload.id} to ${host}:${port}`)
+    axios.post(`http://${host}:${port}/events`, {
+      event_payload
+    })
+      .then(({data}) => {
+        if (data.status !== 'OK') {
+          console.info(`event type:${event_payload.event_name} with id:${event_payload.id} consumed`);
+          eventQueueManager.succeeded(event_payload.id);
+        }
+      })
+      .catch(err => {
+        console.error(`error in consuming event type:${event_payload.event_name} with id:${event_payload.id} : `, err);
+        eventQueueManager.failed(event_payload.id);
+      });
+  } catch (error) {
+    console.error(`error in ${host} events endpoint : `, error);
+  }
+}
 
 app.post("/events", (req, res) => {
   const event = req.body
-
-  console.log('events', events);
-
-  events.push(event)
-
-  try {
-    axios.post('http://posts:4000/events', event).catch(err => console.error('error in posts events endpoint : ', err)); // posts
-    axios.post('http://comments:4001/events', event).catch(err => console.error('error in comments events endpoint : ', err)); // comments
-    axios.post('http://query:4002/events', event).catch(err => console.error('error in query events endpoint : ', err)); // query
-    axios.post('http://moderation:4003/events', event).catch(err => console.error('error in moderation events endpoint : ', err)); // moderation
-  } catch (error) {
-    console.error('error in event bus events endpoint : ', error);
+  /** @type {{id, event_name, event_data, event_status, retry_count}} */
+  const payload = {
+    id: randomBytes(4).toString('hex'),
+    event_name: event.type,
+    event_data: event.data,
+    event_status: 'pending',
+    retry_count: 0
   }
 
-  res.send({ status: 'OK' })
+  eventQueueManager.add(payload);
+
+  try {
+    switch (event.type) {
+      case 'PostCreated':
+        sendEvent(payload, QUERY_HOST, QUERY_PORT);
+        break;
+      case 'CommentCreated':
+        sendEvent(payload, MODERATION_HOST, MODERATION_PORT);
+        sendEvent(payload, QUERY_HOST, QUERY_PORT);
+        break;
+      case 'CommentUpdated':
+        sendEvent(payload, QUERY_HOST, QUERY_PORT);
+        break;
+      case 'CommentModerated':
+        sendEvent(payload, COMMENTS_HOST, COMMENTS_PORT);
+        break;
+      default:
+        break;
+    }
+  } catch (error) {
+    console.error('error in event-bus events endpoint : ', error);
+  }
+  res.send({status: 'OK'})
 });
 
 app.get("/events", (req, res) => {
-  console.log('events', events)
-  res.send(events);
+  do {
+    const nextEvent = eventQueueManager.next();
+    if (!nextEvent) {
+      break;
+    }
+    res.send({
+      event_payload: nextEvent
+    });
+  } while (!eventQueueManager.isEmpty());
 });
 
 app.listen(4005, () => {

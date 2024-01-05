@@ -22,6 +22,3 @@ create table query_comments (
     FOREIGN KEY(post_id) REFERENCES query_posts(post_id) on delete cascade,
     INDEX idx_comment_id (comment_id)
 );
-
--- CREATE INDEX IF NOT EXISTS idx_post_id on query_posts (post_id);
--- CREATE INDEX IF NOT EXISTS idx_comment_id on query_comments (comment_id);

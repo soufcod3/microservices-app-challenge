@@ -1,7 +1,4 @@
 import {Body, Get, Path, Post, Route} from "tsoa";
-import {Moderator} from "../services/Moderator";
-import {Post as OrmPost} from "../services/ORM/Entity/OrmPost";
-import {v4 as uuid} from 'uuid';
 import {DomainService} from "../services/DomainService";
 import {Controller} from "@tsoa/runtime";
 import {injectable} from "tsyringe";

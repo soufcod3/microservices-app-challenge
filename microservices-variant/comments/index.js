@@ -59,7 +59,6 @@ app.post('/events', async (req, res) => {
         await DB_POOL.promise().query('UPDATE comments SET status = ? WHERE id = ?', [status, id]);
 
         try {
-
             await axios.post('http://event-bus:4005/events', {
                 type: 'CommentUpdated',
                 data: {

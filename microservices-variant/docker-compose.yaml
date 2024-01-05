@@ -41,6 +41,8 @@ services:
       - "4005:4005"
     volumes:
       - ./event-bus:/microservices-variant/event-bus:cached
+      - ./dbms/ddl/init-event-bus.sql:/microservices-variant/dbms/ddl/init.sql:cached
+      - ./dbms/ddl/ddl-event-bus.sql:/microservices-variant/dbms/ddl/ddl.sql:cached
 
   moderation:
     build:

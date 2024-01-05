@@ -12,6 +12,6 @@ ENV TZ Europe/Paris
 
 ENV SHELL /bin/bash
 
-WORKDIR /home/api
+WORKDIR /home/query
 
 RUN /bin/bash

@@ -16,8 +16,6 @@ const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 
-const posts = {}
-
 const handleEvent = async (type, data) => {
 
     if (type === 'PostCreated') {
@@ -31,7 +29,9 @@ const handleEvent = async (type, data) => {
 
         try {
             await DB_POOL.promise().query('INSERT INTO query_posts SET ?', queryData);
-        } catch (error) {}
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     if (type === 'CommentCreated') {
@@ -79,10 +79,11 @@ app.get('/posts', async (req, res) => {
     res.send(posts);
 })
 
-app.post('/events', (req, res) => {
-    const { type, data } = req.body
+app.post('/events', async (req, res) => {
+    /** @type {{id, event_name, event_data, event_status, retry_count}} */
+    const { event_payload } = req.body;
 
-    handleEvent(type, data)
+    await handleEvent(event_payload.event_name, event_payload.event_data)
 
     res.send({})
 })
@@ -91,11 +92,8 @@ app.listen(4002, async () => {
     console.log('listening on 4002')
 
     const res = await axios.get('http://event-bus:4005/events')
-    eventsData = res.data
+    /** @type {{id, event_name, event_data, event_status, retry_count}} */
+    const {event_payload} = res.data;
 
-    for (const event of eventsData) {
-        console.log('processing event : ', event.type)
-
-        handleEvent(event.type, event.data)
-    }
+    await handleEvent(event_payload.event_name, event_payload.event_data);
 })

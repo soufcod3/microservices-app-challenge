@@ -1,5 +1,5 @@
 import {DataSource} from "typeorm";
-import {Post as OrmPost} from "./Entity/OrmPost";
+import {OrmPost} from "./Entity/OrmPost";
 import {Comment} from "./Entity/OrmComment";
 
 export class Datasource {
