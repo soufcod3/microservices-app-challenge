@@ -16,74 +16,45 @@ const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 
-const handleEvent = async (type, data) => {
+const posts = {}
+
+const handleEvent = (type, data) => {
+
+    console.log('data', data)
 
     if (type === 'PostCreated') {
-        console.log('PostCreated');
-        const id = randomBytes(4).toString('hex');
-        const queryData = {
-            id,
-            post_id: data.id,
-            post_title: data.title,
-        }
-
-        try {
-            await DB_POOL.promise().query('INSERT INTO query_posts SET ?', queryData);
-        } catch (error) {
-            console.log(error)
-        }
+        const { id, title } = data
+        posts[id] = { id, title, comments: [] }
     }
 
     if (type === 'CommentCreated') {
-        console.log('CommentCreated');
-        const { id, content, post_id, status } = data
+        const { id, content, postId, status } = data
 
-        const queryData = {
-            id,
-            post_id,
-            comment_id: id,
-            comment: content,
-            comment_status: status
-        }
-
-        try {
-            await DB_POOL.promise().query('INSERT INTO query_comments SET ?', queryData);
-        } catch (error) {}
+        const post = posts[postId]
+        post.comments.push({ id, content, status })
     }
 
     if (type === 'CommentUpdated') {
-        console.log('CommentUpdated');
-        const { id, status } = data
+        const { id, content, postId, status } = data
 
-        try {
-            const commentToUpdate = (await DB_POOL.promise().query('SELECT * FROM query_comments WHERE comment_id = ? limit 1', id))[0][0];
+        const post = posts[postId]
+        const comment = post.comments.find(comment => {
+            return comment.id === id;
+        })
 
-            await DB_POOL.promise().query('UPDATE query_comments SET comment_status = ? WHERE comment_id = ?', [status, commentToUpdate?.comment_id]);
-        } catch (error) {}
+        comment.content = content
+        comment.status = status
     }
 }
 
-app.get('/', (req, res) => {
-    res.send('Hello');
-});
-
-app.get('/posts', async (req, res) => {
-    const posts = (await DB_POOL.promise().query('SELECT * FROM query_posts'))[0];
-
-    const comments = (await DB_POOL.promise().query('SELECT * FROM query_comments'))[0];
-
-    for (const post of posts) {
-        post.comments = comments.filter(comment => comment.post_id === post.post_id);
-    }
-
+app.get('/posts', (req, res) => {
     res.send(posts);
 })
 
-app.post('/events', async (req, res) => {
-    /** @type {{id, event_name, event_data, event_status, retry_count}} */
-    const { event_payload } = req.body;
+app.post('/events', (req, res) => {
+    const { type, data } = req.body
 
-    await handleEvent(event_payload.event_name, event_payload.event_data)
+    handleEvent(type, data)
 
     res.send({})
 })
@@ -91,9 +62,11 @@ app.post('/events', async (req, res) => {
 app.listen(4002, async () => {
     console.log('listening on 4002')
 
-    const res = await axios.get('http://event-bus:4005/events')
-    /** @type {{id, event_name, event_data, event_status, retry_count}} */
-    const {event_payload} = res.data;
+    const res = await axios.get('http://event-bus-srv:4005/events')
 
-    await handleEvent(event_payload.event_name, event_payload.event_data);
+    for (const event of res.data) {
+        console.log('processing event : ', event.type)
+
+        handleEvent(event.type, event.data)
+    }
 })

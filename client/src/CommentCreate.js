@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {getActiveUri} from "./utils/getActiveUri";
-import {CREATE_COMMENT} from "./utils/portList";
 
 const CommentCreate = ({ postId }) => {
   const [content, setContent] = useState("");
@@ -9,16 +7,11 @@ const CommentCreate = ({ postId }) => {
   const onSubmit = async (event) => {
     event.preventDefault();
 
-    getActiveUri(CREATE_COMMENT)
-      .then( async (uri) => {
-        await axios.post(uri + `/posts/${postId}/comments`, {
-          content,
-        });
-        setContent("");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    await axios.post(`http://posts.com/posts/${postId}/comments`, {
+      content,
+    });
+
+    setContent("");
   };
 
   return (

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: client
+          image: soufcode/client:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-srv
+spec:
+  selector: # tells the service what pods its going to allow access to
+    app: client
+  type: ClusterIP # by default
+  ports:
+    - name: client
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
