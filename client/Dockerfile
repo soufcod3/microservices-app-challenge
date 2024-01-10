@@ -1,11 +1,17 @@
-FROM node:alpine
+FROM node:18
 
-ENV CI=true
-ENV WDS_SOCKET_PORT=0
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && apt-get install -y mycli \
+    && apt-get install -y less \
+    && apt-get install -y tzdata \
+    && npm install -g typescript \
+    && npm install -g ts-node
 
-WORKDIR /app
-COPY package.json ./
-RUN npm install
-COPY ./ ./
+ENV TZ Europe/Paris
 
-CMD ["npm", "start"]
+ENV SHELL /bin/bash
+
+WORKDIR /home/app
+
+RUN /bin/bash
