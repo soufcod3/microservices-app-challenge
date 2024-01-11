@@ -19,3 +19,4 @@ Ajoutez une capture d'écran pour montrer les modifications visuelles.
 - [ ] J'ai effectué une auto-évaluation de mon code
 - [ ] J'ai testé les modifications avec les étapes décrites ci-dessus
 - [ ] J'attends au moins un commentaire pour possiblement apporter des modifications supplémentaires.
+
