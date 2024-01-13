@@ -19,73 +19,65 @@ services:
       context: .
       dockerfile: ./comments/docker/Dockerfile
     command: /bin/bash -c "while sleep 1000; do :; done"
-    working_dir: /microservices-variant-js/comments
+    working_dir: /home/comments
     networks:
       - api-network
     ports:
       - "4001:4001"
     volumes:
-      - ./comments:/microservices-variant-js/comments:cached
-      - ./dbms/ddl/init-comments.sql:/microservices-variant-js/dbms/ddl/init.sql:cached
-      - ./dbms/ddl/ddl-comments.sql:/microservices-variant-js/dbms/ddl/ddl.sql:cached
+      - ./comments:/home/comments:cached
 
   event-bus:
     build:
       context: .
       dockerfile: ./event-bus/docker/Dockerfile
     command: /bin/bash -c "while sleep 1000; do :; done"
-    working_dir: /microservices-variant-js/event-bus
+    working_dir: /home/event-bus
     networks:
       - api-network
     ports:
       - "4005:4005"
     volumes:
-      - ./event-bus:/microservices-variant-js/event-bus:cached
-      - ./dbms/ddl/init-event-bus.sql:/microservices-variant-js/dbms/ddl/init.sql:cached
-      - ./dbms/ddl/ddl-event-bus.sql:/microservices-variant-js/dbms/ddl/ddl.sql:cached
+      - ./event-bus:/home/event-bus:cached
 
   moderation:
     build:
       context: .
       dockerfile: ./moderation/docker/Dockerfile
     command: /bin/bash -c "while sleep 1000; do :; done"
-    working_dir: /microservices-variant-js/moderation
+    working_dir: /home/moderation
     networks:
       - api-network
     ports:
       - "4003:4003"
     volumes:
-      - ./moderation:/microservices-variant-js/moderation:cached
+      - ./moderation:/home/moderation:cached
 
   posts:
     build:
       context: .
       dockerfile: ./posts/docker/Dockerfile
     command: /bin/bash -c "while sleep 1000; do :; done"
-    working_dir: /microservices-variant-js/posts
+    working_dir: /home/posts
     networks:
       - api-network
     ports:
       - "4000:4000"
     volumes:
-      - ./posts:/microservices-variant-js/posts:cached
-      - ./dbms/ddl/init-posts.sql:/microservices-variant-js/dbms/ddl/init.sql:cached
-      - ./dbms/ddl/ddl-posts.sql:/microservices-variant-js/dbms/ddl/ddl.sql:cached
+      - ./posts:/home/posts:cached
 
   query:
     build:
       context: .
       dockerfile: ./query/docker/Dockerfile
     command: /bin/bash -c "while sleep 1000; do :; done"
-    working_dir: /microservices-variant-js/query
+    working_dir: /home/query
     networks:
       - api-network
     ports:
       - "4002:4002"
     volumes:
-      - ./query:/microservices-variant-js/query:cached
-      - ./dbms/ddl/init-query.sql:/microservices-variant-js/dbms/ddl/init.sql:cached
-      - ./dbms/ddl/ddl-query.sql:/microservices-variant-js/dbms/ddl/ddl.sql:cached
+      - ./query:/home/query:cached
 
   proxy:
     image: nginx
@@ -99,10 +91,10 @@ services:
       - api-network
 
   dbms:
-    image: mariadb
+    image: mariadb:10
     restart: always
     ports:
-      - "3309:3306"
+      - "3306:3306"
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=false
       - MYSQL_ROOT_PASSWORD=rootpassword
@@ -111,8 +103,8 @@ services:
       "--collation-server=utf8mb4_unicode_ci",
     ]
     volumes:
+      - ./dbms/ddl:/docker-entrypoint-initdb.d
       - ./dbms/mariadb.cnf:/etc/mysql/mariadb.cnf
-      - ./dbms/dbms-data:/var/lib/mysql
     networks:
       - api-network
 

@@ -8,35 +8,45 @@ const { randomBytes } = require('crypto')
 
 const DB_POOL = mysql.createPool({
     host: 'dbms',
-    user: 'dev',
-    password: 'devpassword',
-    database: 'posts',
+    user: 'root',
+    password: 'rootpassword',
+    database: 'posts_db',
 });
 
 const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 
-const posts = {}
+app.get('/posts', async (req, res) => {
+    const posts = await DB_POOL.promise().query('SELECT * FROM posts')[0];
 
-app.get('/posts', (req, res) => { // unused anymore : query is doing the job
-    res.send(posts)
+    res.send(posts);
 })
 
-app.post('/posts/create', async (req, res) => {
-    const id = randomBytes(4).toString('hex')
-    const { title } = req.body
-    posts[id] = { id, title }
+app.get('/', (req, res) => {
+    res.send('Hello');
+});
 
-    await axios.post('http://event-bus-srv:4005/events', { 
-        type: 'PostCreated', 
-        data: { 
-            id, title
-        }
-    })
+app.post('/posts',
+  async (req, res) => {
+      const id = randomBytes(4).toString('hex')
+      const {title} = req.body
+      const post = {id, title}
 
-    res.status(201).send(posts[id])
-})
+      await DB_POOL.promise().query('INSERT INTO posts SET ?', post);
+
+
+      try {
+          await axios.post('http://event-bus:4005/events', {
+              type: 'PostCreated',
+              data: post
+          })
+      } catch (error) {
+          console.error('error in posts events endpoint : ', error);
+      }
+
+      res.status(201).send(post)
+  })
 
 app.post('/events', (req, res) => {
     console.log('received event', req.body.type)

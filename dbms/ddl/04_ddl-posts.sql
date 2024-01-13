@@ -1,4 +1,4 @@
-USE microservices_variant_posts_db;
+USE posts_db;
 
 DROP TABLE IF EXISTS posts;
 

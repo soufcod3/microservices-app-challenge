@@ -1,4 +1,4 @@
-USE microservices_variant_query_db;
+USE query_db;
 
 DROP TABLE IF EXISTS query_comments;
 DROP TABLE IF EXISTS query_posts;

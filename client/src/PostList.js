@@ -2,14 +2,20 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CommentCreate from "./CommentCreate";
 import CommentList from "./CommentList";
+import {getActiveUri} from "./utils/getActiveUri";
+import {GET_POSTS} from "./utils/portList";
 
 const PostList = () => {
   const [posts, setPosts] = useState({});
 
   const fetchPosts = async () => {
-    const res = await axios.get("http://posts.com/posts");
-
-    setPosts(res.data);
+    getActiveUri(GET_POSTS)
+      .then( async (uri) => {
+        const res = await axios.get(uri + '/posts');
+        setPosts(res.data);
+        console.log(res.data);
+        return uri
+      })
   };
 
   useEffect(() => {
@@ -24,9 +30,9 @@ const PostList = () => {
         key={post.id}
       >
         <div className="card-body">
-          <h3>{post.title}</h3>
+          <h3>{post.post_title}</h3>
           <CommentList comments={post.comments} />
-          <CommentCreate postId={post.id} />
+          <CommentCreate postId={post.post_id} />
         </div>
       </div>
     );

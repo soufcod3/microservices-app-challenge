@@ -1,4 +1,4 @@
-USE microservices_variant_comments_db;
+USE comments_db;
 
 DROP TABLE IF EXISTS comments;
 
